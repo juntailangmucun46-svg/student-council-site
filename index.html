@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>生徒会</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>生徒会</h1>
+            <p>様々なリンク集</p>
+        </header>
+
+        <main>
+            <section class="links-section">
+                <h2>リンク集</h2>
+                <div id="links-container" class="links-grid">
+                    <!-- リンクがここに表示されます -->
+                </div>
+                <p id="no-links" class="no-links">まだリンクがありません</p>
+            </section>
+
+            <div class="footer-section">
+                <a href="admin.html" class="admin-button">管理画面へ</a>
+            </div>
+        </main>
+
+        <footer>
+            <p>&copy; 2026 生徒会</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            displayLinks();
+        });
+
+        function displayLinks() {
+            const links = getLinks();
+            const container = document.getElementById('links-container');
+            const noLinks = document.getElementById('no-links');
+
+            container.innerHTML = '';
+
+            if (links.length === 0) {
+                noLinks.style.display = 'block';
+            } else {
+                noLinks.style.display = 'none';
+                links.forEach(link => {
+                    const linkElement = document.createElement('a');
+                    linkElement.href = link.url;
+                    linkElement.className = 'link-card';
+                    linkElement.target = '_blank';
+                    linkElement.rel = 'noopener noreferrer';
+                    linkElement.innerHTML = `
+                        <div class="link-card-content">
+                            <h3>${link.title}</h3>
+                            <p>${link.description}</p>
+                        </div>
+                    `;
+                    container.appendChild(linkElement);
+                });
+            }
+        }
+    </script>
+</body>
+</html>
