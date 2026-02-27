@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理画面 - 生徒会</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>生徒会 - 管理画面</h1>
+            <a href="index.html" class="back-button">← サイトに戻る</a>
+        </header>
+
+        <main>
+            <section class="admin-section">
+                <h2>リンク管理</h2>
+
+                <!-- フォーム -->
+                <div class="form-container">
+                    <h3 id="form-title">新規リンク追加</h3>
+                    <form id="link-form">
+                        <div class="form-group">
+                            <label for="link-title">タイトル</label>
+                            <input type="text" id="link-title" placeholder="例：Google" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="link-url">URL</label>
+                            <input type="url" id="link-url" placeholder="例：https://google.com" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="link-description">説明</label>
+                            <textarea id="link-description" placeholder="例：検索エンジン" rows="3"></textarea>
+                        </div>
+
+                        <div class="form-buttons">
+                            <button type="submit" class="btn-primary">追加</button>
+                            <button type="button" class="btn-secondary" id="cancel-btn" style="display:none;">キャンセル</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- リンク一覧 -->
+                <div class="links-list">
+                    <h3>登録済みリンク</h3>
+                    <div id="admin-links-container">
+                        <!-- 登録済みリンクがここに表示されます -->
+                    </div>
+                    <p id="no-admin-links" class="no-links">リンクがありません</p>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; 2026 生徒会</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        let editingId = null;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            displayAdminLinks();
+            setupFormListeners();
+        });
+
+        function setupFormListeners() {
+            const form = document.getElementById('link-form');
+            const cancelBtn = document.getElementById('cancel-btn');
+
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                addOrUpdateLink();
+            });
+
+            cancelBtn.addEventListener('click', function() {
+                resetForm();
+            });
+        }
+
+        function addOrUpdateLink() {
+            const title = document.getElementById('link-title').value;
+            const url = document.getElementById('link-url').value;
+            const description = document.getElementById('link-description').value;
+
+            if (!title || !url) {
+                alert('タイトルとURLは必須です');
+                return;
+            }
+
+            let links = getLinks();
+
+            if (editingId !== null) {
+                // 更新
+                const index = links.findIndex(l => l.id === editingId);
+                if (index !== -1) {
+                    links[index] = { id: editingId, title, url, description };
+                }
+                editingId = null;
+            } else {
+                // 新規追加
+                const newLink = {
+                    id: Date.now(),
+                    title,
+                    url,
+                    description
+                };
+                links.push(newLink);
+            }
+
+            saveLinks(links);
+            resetForm();
+            displayAdminLinks();
+        }
+
+        function displayAdminLinks() {
+            const links = getLinks();
+            const container = document.getElementById('admin-links-container');
+            const noLinks = document.getElementById('no-admin-links');
+
+            container.innerHTML = '';
+
+            if (links.length === 0) {
+                noLinks.style.display = 'block';
+            } else {
+                noLinks.style.display = 'none';
+                links.forEach(link => {
+                    const linkItem = document.createElement('div');
+                    linkItem.className = 'admin-link-item';
+                    linkItem.innerHTML = `
+                        <div class="link-info">
+                            <h4>${link.title}</h4>
+                            <p><a href="${link.url}" target="_blank">${link.url}</a></p>
+                            <p>${link.description}</p>
+                        </div>
+                        <div class="link-actions">
+                            <button class="btn-edit" onclick="editLink(${link.id})">編集</button>
+                            <button class="btn-delete" onclick="deleteLink(${link.id})">削除</button>
+                        </div>
+                    `;
+                    container.appendChild(linkItem);
+                });
+            }
+        }
+
+        function editLink(id) {
+            const links = getLinks();
+            const link = links.find(l => l.id === id);
+
+            if (link) {
+                document.getElementById('link-title').value = link.title;
+                document.getElementById('link-url').value = link.url;
+                document.getElementById('link-description').value = link.description;
+                document.getElementById('form-title').textContent = 'リンク編集';
+                document.getElementById('cancel-btn').style.display = 'inline-block';
+                editingId = id;
+                window.scrollTo(0, 0);
+            }
+        }
+
+        function deleteLink(id) {
+            if (confirm('このリンクを削除してもよろしいですか？')) {
+                let links = getLinks();
+                links = links.filter(l => l.id !== id);
+                saveLinks(links);
+                displayAdminLinks();
+            }
+        }
+
+        function resetForm() {
+            document.getElementById('link-form').reset();
+            document.getElementById('form-title').textContent = '新規リンク追加';
+            document.getElementById('cancel-btn').style.display = 'none';
+            editingId = null;
+        }
+    </script>
+</body>
+</html>
